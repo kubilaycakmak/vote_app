@@ -14,14 +14,14 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    _onLoginButtonPressed(){
-      BlocProvider.of<LoginBloc>(context).add(
-        LoginButtonPressed(
-          username: _usernameController.text,
-          password: _passwordController.text
-        ),
-      );
-    }
+    // _onLoginButtonPressed(){
+    //   BlocProvider.of<LoginBloc>(context).add(
+    //     LoginButtonPressed(
+    //       username: _usernameController.text,
+    //       password: _passwordController.text
+    //     ),
+    //   );
+    // }
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state){
         if(state is LoginFailure){
@@ -48,7 +48,7 @@ class _LoginFormState extends State<LoginForm> {
                   obscureText: true,
                 ),
                 FloatingActionButton.extended(
-                  onPressed: state is! LoginLoading ? _onLoginButtonPressed() : null,
+                  onPressed: null,
                   label: Text('Login')
                 ),
                 Container(

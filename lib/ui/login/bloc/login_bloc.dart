@@ -15,8 +15,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginBloc({
     @required this.userRepository,
-    @required this.authenticationBloc})
-   : assert(userRepository != null),
+    this.authenticationBloc})
+   : 
      assert(authenticationBloc != null);
 
   @override
@@ -28,7 +28,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async* {
     if(event is LoginButtonPressed){
       yield LoginLoading();
-
       try{
         final token = await userRepository.authenticate(username: event.username, password: event.password);
         authenticationBloc.add(Login(token: token));
