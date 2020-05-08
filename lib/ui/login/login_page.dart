@@ -3,6 +3,8 @@ import 'package:vote_app/ui/style/color/colors.dart';
 import 'package:vote_app/ui/style/text/style.dart';
 import 'package:vote_app/ui/welcome/welcome_page.dart';
 
+import 'verify_page.dart';
+
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -84,7 +86,12 @@ class LoginPage extends StatelessWidget {
               child: Container(
                 width: 999,
                 child: FloatingActionButton.extended(
-                    heroTag: 'login', onPressed: null, label: Text('Login')),
+                    heroTag: 'login',
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => VerifyPage()));
+                    },
+                    label: Text('Login')),
               )),
           Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
