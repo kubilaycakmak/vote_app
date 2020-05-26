@@ -11,6 +11,11 @@ var h0 = TextStyle(
   fontSize: 40,
   fontWeight: FontWeight.w800,
 );
+var h0black = TextStyle(
+  color: Colors.black,
+  fontSize: 40,
+  fontWeight: FontWeight.w800,
+);
 var h1 =
     TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w400);
 var h2 =

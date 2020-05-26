@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
 
 import '../../main.dart';
+import '../home/home_page.dart';
 
 class VerifyPage extends StatefulWidget {
   @override
@@ -43,6 +44,7 @@ class _VerifyPageState extends State<VerifyPage> with WidgetsBindingObserver {
     super.initState();
     print("camera direction : + ${cameraDescription.lensDirection.toString()}");
     onNewCameraSelected(cameraDescription);
+    controller.initialize();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -78,7 +80,9 @@ class _VerifyPageState extends State<VerifyPage> with WidgetsBindingObserver {
           SizedBox(
             width: 90.0,
             child: RadioListTile<CameraDescription>(
-                title: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
+                toggleable: true,
+                dense: true,
+                secondary: Text(cameraDescription.name),
                 groupValue: controller?.description,
                 value: cameraDescription,
                 onChanged: onNewCameraSelected),
@@ -156,18 +160,10 @@ class _VerifyPageState extends State<VerifyPage> with WidgetsBindingObserver {
   }
 
   void onTakePictureButtonPressed() {
-    Navigator.pop(context);
-    takePicture().then((String filePath) {
-      //TODO: will do functions to get photo data to send algorithm
-      // if (mounted) {
-      //   setState(() {
-      //     imagePath = filePath;
-      //     videoController?.dispose();
-      //     videoController = null;
-      //   });
-      //   if (filePath != null) showInSnackBar('Picture saved to $filePath');
-      // }
-    });
+    // Navigator.pop(context);
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => HomePage()));
+    takePicture().then((String filePath) {});
   }
 
   Widget _captureControlRowWidget() {
@@ -235,7 +231,7 @@ class _VerifyPageState extends State<VerifyPage> with WidgetsBindingObserver {
   Widget _cameraPreviewWidget() {
     if (controller == null || !controller.value.isInitialized) {
       return const Text(
-        'Tap a camera',
+        '',
         style: TextStyle(
           color: Colors.white,
           fontSize: 24.0,
