@@ -22,7 +22,7 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   final _dataBloc = kiwi.Container().resolve<GetdataBloc>();
   Map<String, double> dataMap = Map();
-  
+
   List<Color> colorList = [
     Colors.red,
     Colors.green,

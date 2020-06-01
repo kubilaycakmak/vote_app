@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:getflutter/getflutter.dart';
 import 'package:pie_chart/pie_chart.dart';
 import '../style/text/style.dart';
 import '../welcome/welcome_page.dart';
@@ -37,156 +38,185 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHomePage() {
     return Container(
-      color: Colors.lightBlue[200],
+      color: Color.fromRGBO(19, 76, 113, 1),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-              margin: const EdgeInsets.only(left: 20, right: 20),
+              margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 50,
-                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
+                        horizontal: 10, vertical: 10),
                     child: Text(
                       'Current',
                       style: h0,
                     ),
                   ),
-                  PieChart(
-                    dataMap: dataMap,
-                    animationDuration: Duration(milliseconds: 800),
-                    chartLegendSpacing: 10.0,
-                    chartRadius: MediaQuery.of(context).size.width / 2.7,
-                    showChartValuesInPercentage: true,
-                    showChartValues: true,
-                    showChartValuesOutside: false,
-                    chartValueBackgroundColor: Colors.grey[200],
-                    colorList: colorList,
-                    showLegends: true,
-                    legendPosition: LegendPosition.right,
-                    initialAngle: 3,
-                    chartValueStyle: defaultChartValueStyle.copyWith(
-                      color: Colors.blueGrey[900].withOpacity(0.9),
+                  Container(
+                    color: Colors.white,
+                    child: PieChart(
+                      dataMap: dataMap,
+                      animationDuration: Duration(milliseconds: 800),
+                      chartLegendSpacing: 10.0,
+                      chartRadius: MediaQuery.of(context).size.width / 2.7,
+                      showChartValuesInPercentage: true,
+                      showChartValues: true,
+                      showChartValuesOutside: false,
+                      chartValueBackgroundColor: Colors.grey[200],
+                      colorList: colorList,
+                      showLegends: true,
+                      legendPosition: LegendPosition.right,
+                      initialAngle: 3,
+                      chartValueStyle: defaultChartValueStyle.copyWith(
+                        color: Colors.blueGrey[900].withOpacity(0.9),
+                      ),
+                      chartType: ChartType.disc,
                     ),
-                    chartType: ChartType.disc,
                   ),
                 ],
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Select box to Vote!',
-                      style: h2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                  child: Text(
+                    'Tap to Vote!',
+                    style: h2,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+                  child: GFItemsCarousel(
+                    itemHeight: 100,
+                    rowCount: 4,
+                    children: List.generate(
+                      4,
+                      (index) => Container(
+                        width: 200,
+                        padding: EdgeInsets.symmetric(horizontal: 5),
+                        child: FlatButton(
+                          onPressed: () {},
+                          child: Text(index.toString()),
+                          color:
+                              Color.fromRGBO(index * 65, index * 220, 255, 1),
+                        ),
+                      ),
                     ),
                   ),
-                  Container(
-                    height: 200,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: List.generate(4, (index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: Container(
-                            height: 100,
-                            width: 200,
-                            color: Color.fromRGBO(59 * index + 1,
-                                25 * index + 1, 10 * index + 1, 1),
-                          ),
-                        );
-                      }),
-                    ),
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           SliverToBoxAdapter(
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Other Elections',
-                      style: h2,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                  child: Text(
+                    'Join another election',
+                    style: h2,
                   ),
-                  Container(
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+                  child: GFCarousel(
                     height: 250,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: List.generate(4, (index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: Container(
-                            height: 100,
-                            width: 200,
-                            color: Color.fromRGBO(19 * index + 1,
-                                95 * index + 2, 10 * index + 1, 0.9),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(25.0),
-                                  child: ClipOval(
-                                    clipBehavior: Clip.antiAlias,
-                                    child: Container(
-                                      color: Color.fromRGBO(999 * index,
-                                          95 * index, 10 * index, 1),
-                                      height: 140,
-                                    ),
-                                  ),
-                                ),
-                                FlatButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Tikla',
-                                    style: TextStyle(
-                                        color: Theme.of(context)
-                                            .primaryTextTheme
-                                            .button
-                                            .color),
-                                  ),
-                                )
-                              ],
-                            ),
+                    items: [
+                      GFCard(
+                        boxFit: BoxFit.cover,
+                        image: Image.asset('your asset image'),
+                        title: GFListTile(
+                          avatar: GFAvatar(),
+                          title: Text('Card Title'),
+                          icon: GFIconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.favorite_border),
                           ),
-                        );
-                      }),
-                    ),
-                  )
-                ],
-              ),
+                        ),
+                        content: Text(
+                            "Some quick example text to build on the card"),
+                        buttonBar: GFButtonBar(
+                          children: <Widget>[
+                            GFButton(
+                              onPressed: () {},
+                              text: 'Join',
+                            ),
+                          ],
+                        ),
+                      ),
+                      GFCard(
+                        boxFit: BoxFit.cover,
+                        image: Image.asset('your asset image'),
+                        title: GFListTile(
+                          avatar: GFAvatar(),
+                          title: Text('Card Title'),
+                          icon: GFIconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.favorite_border),
+                          ),
+                        ),
+                        content: Text(
+                            "Some quick example text to build on the card"),
+                        buttonBar: GFButtonBar(
+                          children: <Widget>[
+                            GFButton(
+                              onPressed: () {},
+                              text: 'Join',
+                            ),
+                          ],
+                        ),
+                      ),
+                      GFCard(
+                        boxFit: BoxFit.cover,
+                        image: Image.asset('your asset image'),
+                        title: GFListTile(
+                          avatar: GFAvatar(),
+                          title: Text('Card Title'),
+                          icon: GFIconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.favorite_border),
+                          ),
+                        ),
+                        content: Text(
+                            "Some quick example text to build on the card"),
+                        buttonBar: GFButtonBar(
+                          children: <Widget>[
+                            GFButton(
+                              onPressed: () {},
+                              text: 'Join',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           SliverToBoxAdapter(
-              child: Container(
-            color: Colors.white,
-            height: 100,
-            child: FlatButton(
-              child: Text('Logout'),
-              onPressed: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => WelcomePage()));
-              },
+            child: Container(
+              color: Colors.white,
+              height: 80,
+              child: GFButton(
+                child: Text('Logout'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => WelcomePage()));
+                },
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
