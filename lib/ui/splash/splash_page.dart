@@ -10,15 +10,16 @@ class SplashPage extends StatelessWidget {
     return SplashScreen(
       seconds: 5,
       navigateAfterSeconds: new WelcomePage(),
-      title: new Text('VOTE',
-        style: titleText
-      ),
+      title: new Text('VOTE', style: titleText),
       gradientBackground: backgroundGradient,
       backgroundColor: Colors.white,
       styleTextUnderTheLoader: new TextStyle(),
       photoSize: 100.0,
-      loadingText: Text('Loading', style: paragraphText,),
-      onClick: ()=>print("Flutter Egypt"),
+      loadingText: Text(
+        'Loading',
+        style: paragraphText,
+      ),
+      onClick: () => print("Flutter Egypt"),
       loaderColor: Colors.white,
     );
   }

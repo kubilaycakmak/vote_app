@@ -1,7 +1,8 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:getflutter/getflutter.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vote_app/data/election/election_list.dart';
+import 'package:vote_app/data/repository/election_repository.dart';
 import '../style/text/style.dart';
 import '../welcome/welcome_page.dart';
 
@@ -11,6 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Future<ElectionList> futureElection;
   Map<String, double> dataMap = Map();
 
   List<Color> colorList = [
@@ -23,10 +25,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    dataMap.putIfAbsent("A", () => 5);
-    dataMap.putIfAbsent("B", () => 3);
-    dataMap.putIfAbsent("C", () => 2);
-    dataMap.putIfAbsent("D", () => 2);
+    futureElection = getElectionInformation();
   }
 
   @override
@@ -37,6 +36,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomePage() {
+    return FutureBuilder<ElectionList>(
+      future: futureElection,
+      builder: (context, snapshot) {
+        dataMap.putIfAbsent(snapshot.data.elections[0].parties.parties[0].name,
+            () => snapshot.data.elections[0].score.scores[0].score.toDouble());
+        dataMap.putIfAbsent(snapshot.data.elections[1].parties.parties[1].name,
+            () => snapshot.data.elections[0].score.scores[1].score.toDouble());
+        if (snapshot.hasData) {
+          return _buildBody(context, snapshot);
+        }
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return Container();
+      },
+    );
+  }
+
+  Container _buildBody(BuildContext context, AsyncSnapshot snapshot) {
     return Container(
       color: Color.fromRGBO(19, 76, 113, 1),
       child: CustomScrollView(
@@ -51,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 10),
                     child: Text(
-                      'Current',
+                      '',
                       style: h0,
                     ),
                   ),

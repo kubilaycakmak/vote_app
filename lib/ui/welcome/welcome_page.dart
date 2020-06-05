@@ -1,26 +1,21 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_sparkline/flutter_sparkline.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:pie_chart/pie_chart.dart';
-import 'package:vote_app/data/dummy/chart_dummy_data.dart';
-import 'package:vote_app/ui/login/login_page.dart';
+import 'package:vote_app/data/election/election_list.dart';
+import 'package:vote_app/data/repository/election_repository.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
 import 'package:vote_app/ui/style/text/style.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
-
-import 'bloc/getdata_bloc.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({Key key}) : super(key: key);
+  final CameraDescription camera;
+
+  const WelcomePage({Key key, this.camera}) : super(key: key);
 
   @override
   _WelcomePageState createState() => _WelcomePageState();
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  final _dataBloc = kiwi.Container().resolve<GetdataBloc>();
+  Future<ElectionList> futureElection;
   Map<String, double> dataMap = Map();
 
   List<Color> colorList = [
@@ -33,10 +28,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    dataMap.putIfAbsent("A", () => 5);
-    dataMap.putIfAbsent("B", () => 3);
-    dataMap.putIfAbsent("C", () => 2);
-    dataMap.putIfAbsent("D", () => 2);
+    futureElection = getElectionInformation();
   }
 
   static final List<String> chartDropdownItems = [
@@ -44,236 +36,269 @@ class _WelcomePageState extends State<WelcomePage> {
     'Last month',
     'Last year'
   ];
+
   String actualDropdown = chartDropdownItems[0];
   int actualChart = 0;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => GetdataBloc(),
-      child: Scaffold(
-          body: BlocBuilder<GetdataBloc, GetdataState>(
-        bloc: _dataBloc,
-        builder: (context, state) {
-          if (state is DataIsNotList) {
-            return buildWelcoming(context);
-            // return Center(
-            //   child: Text('Error'),
-            // );
-          }
-          if (state is DataIsLoading) {
-            return Center(
-              child: SpinKitWave(),
-            );
-          }
-          if (state is DataIsLoaded) {
-            return buildWelcoming(context);
-          }
-          if (state is DataIsNotLoaded) {
-            print('not loaded');
-          }
-          return Center(
-            child: Text('outside of loop'),
-          );
-        },
-      )),
-    );
+    return buildWelcoming(context);
   }
 
   Widget buildWelcoming(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<ElectionList>(
+        future: futureElection,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            dataMap.putIfAbsent(
+                snapshot.data.elections[0].parties.parties[0].name,
+                () => snapshot.data.elections[0].score.scores[0].score
+                    .toDouble());
+            dataMap.putIfAbsent(
+                snapshot.data.elections[1].parties.parties[1].name,
+                () => snapshot.data.elections[0].score.scores[1].score
+                    .toDouble());
+            print(snapshot.hasData);
+            return _buildWelcomePage(context, snapshot, 0);
+          } else if (snapshot.hasError) {
+            return Center(
+                child: Padding(
+              padding: const EdgeInsets.all(68.0),
+              child: Text("${snapshot.error}"),
+            ));
+          }
+          return Container(
+            decoration: BoxDecoration(gradient: backgroundGradient),
+            child: Center(
+              child: Text(
+                'Vote App',
+                style: h0,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Container _buildWelcomePage(
+      BuildContext context, AsyncSnapshot asyncSnapshot, int index) {
     return Container(
       decoration: BoxDecoration(
         gradient: backgroundGradient,
       ),
-      child: StaggeredGridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12.0,
-        mainAxisSpacing: 12.0,
-        scrollDirection: Axis.vertical,
-        shrinkWrap: false,
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        children: <Widget>[
-          Center(
-              child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                'Welome to Vote Application',
-                style: h1,
-                textAlign: TextAlign.center,
-              ),
-              Divider(
-                color: Colors.white,
-              ),
-              Text(
-                'The way secure and simple',
-                style: h2,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          )),
-          FloatingActionButton.extended(
-              heroTag: 'loginButton',
-              backgroundColor: Colors.blue.shade700,
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => LoginPage()));
-              },
-              label: Text('Login')),
-          _buildTile(
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: Column(
-                children: <Widget>[
-                  Text('Dummy VOTE - B'),
-                  PieChart(
-                    dataMap: dataMap,
-                    animationDuration: Duration(milliseconds: 800),
-                    chartLegendSpacing: 10.0,
-                    chartRadius: MediaQuery.of(context).size.width / 2.7,
-                    showChartValuesInPercentage: true,
-                    showChartValues: true,
-                    showChartValuesOutside: false,
-                    chartValueBackgroundColor: Colors.grey[200],
-                    colorList: colorList,
-                    showLegends: true,
-                    legendPosition: LegendPosition.right,
-                    initialAngle: 1,
-                    chartValueStyle: defaultChartValueStyle.copyWith(
-                      color: Colors.blueGrey[900].withOpacity(0.9),
-                    ),
-                    chartType: ChartType.disc,
-                  ),
-                ],
-              ),
-            ),
+      child: SingleChildScrollView(
+          // child: ,
           ),
-          _buildTile(
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: Column(
-                children: <Widget>[
-                  Text('Dummy VOTE - A'),
-                  PieChart(
-                    dataMap: dataMap,
-                    animationDuration: Duration(milliseconds: 800),
-                    chartLegendSpacing: 10.0,
-                    chartRadius: MediaQuery.of(context).size.width / 2.7,
-                    showChartValuesInPercentage: true,
-                    showChartValues: true,
-                    showChartValuesOutside: false,
-                    chartValueBackgroundColor: Colors.grey[200],
-                    colorList: colorList,
-                    showLegends: true,
-                    legendPosition: LegendPosition.right,
-                    initialAngle: 3,
-                    chartValueStyle: defaultChartValueStyle.copyWith(
-                      color: Colors.blueGrey[900].withOpacity(0.9),
-                    ),
-                    chartType: ChartType.disc,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _buildTile(
-            Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('Vote', style: TextStyle(color: Colors.green)),
-                            Text('\16K',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 34.0)),
-                          ],
-                        ),
-                        DropdownButton(
-                            isDense: true,
-                            value: actualDropdown,
-                            onChanged: (String value) => setState(() {
-                                  actualDropdown = value;
-                                  actualChart = chartDropdownItems
-                                      .indexOf(value); // Refresh the chart
-                                }),
-                            items: chartDropdownItems.map((String title) {
-                              return DropdownMenuItem(
-                                value: title,
-                                child: Text(title,
-                                    style: TextStyle(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14.0)),
-                              );
-                            }).toList())
-                      ],
-                    ),
-                    Padding(padding: EdgeInsets.only(bottom: 4.0)),
-                    Sparkline(
-                      data: charts[actualChart],
-                      lineWidth: 5.0,
-                      lineColor: Colors.greenAccent,
-                    )
-                  ],
-                )),
-          ),
-          _buildTile(
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text('Total Vote used',
-                            style: TextStyle(color: Colors.redAccent)),
-                        Text('173K',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 34.0))
-                      ],
-                    ),
-                    Material(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(24.0),
-                        child: Center(
-                            child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Icon(Icons.person,
-                              color: Colors.white, size: 30.0),
-                        )))
-                  ]),
-            ),
-            onTap: () => null,
-          )
-        ],
-        staggeredTiles: [
-          StaggeredTile.extent(2, 140.0),
-          StaggeredTile.extent(2, 50.0),
-          StaggeredTile.extent(1, 180.0),
-          StaggeredTile.extent(1, 180.0),
-          StaggeredTile.extent(2, 220.0),
-          StaggeredTile.extent(2, 110.0),
-        ],
-      ),
     );
   }
+
+  // StaggeredGridView.count(
+  //       crossAxisCount: 2,
+  //       crossAxisSpacing: 12.0,
+  //       mainAxisSpacing: 12.0,
+  //       scrollDirection: Axis.vertical,
+  //       shrinkWrap: false,
+  //       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+  //       children: <Widget>[
+  //         Center(
+  //             child: Column(
+  //           children: <Widget>[
+  //             SizedBox(
+  //               height: 20,
+  //             ),
+  //             Text(
+  //               'Welome to Vote Application',
+  //               style: h1,
+  //               textAlign: TextAlign.center,
+  //             ),
+  //             Divider(
+  //               color: Colors.white,
+  //             ),
+  //             Text(
+  //               'The way secure and simple',
+  //               style: h2,
+  //               textAlign: TextAlign.center,
+  //             ),
+  //           ],
+  //         )),
+  //         FloatingActionButton.extended(
+  //             heroTag: 'loginButton',
+  //             backgroundColor: Colors.blue.shade700,
+  //             onPressed: () {
+  //               Navigator.of(context).push(MaterialPageRoute(
+  //                   builder: (_) => LoginPage(camera: widget.camera)));
+  //             },
+  //             label: Text('Login')),
+  //         _buildTile(
+  //           Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 20.0),
+  //             child: Column(
+  //               children: <Widget>[
+  //                 Text(
+  //                   asyncSnapshot.data.elections[0].description,
+  //                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //                 ),
+  //                 PieChart(
+  //                   dataMap: dataMap,
+  //                   animationDuration: Duration(milliseconds: 800),
+  //                   chartLegendSpacing: 10.0,
+  //                   chartRadius: MediaQuery.of(context).size.width / 2.7,
+  //                   showChartValuesInPercentage: true,
+  //                   showChartValues: true,
+  //                   showChartValuesOutside: false,
+  //                   chartValueBackgroundColor: Colors.grey[200],
+  //                   colorList: colorList,
+  //                   showLegends: true,
+  //                   legendPosition: LegendPosition.right,
+  //                   initialAngle: 1,
+  //                   chartValueStyle: defaultChartValueStyle.copyWith(
+  //                     color: Colors.blueGrey[900].withOpacity(0.9),
+  //                   ),
+  //                   chartType: ChartType.disc,
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //         _buildTile(
+  //           Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 20.0),
+  //             child: Column(
+  //               children: <Widget>[
+  //                 Text(
+  //                   asyncSnapshot.data.elections[1].description,
+  //                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //                 ),
+  //                 PieChart(
+  //                   dataMap: dataMap,
+  //                   animationDuration: Duration(milliseconds: 800),
+  //                   chartLegendSpacing: 10.0,
+  //                   chartRadius: MediaQuery.of(context).size.width / 2.7,
+  //                   showChartValuesInPercentage: true,
+  //                   showChartValues: true,
+  //                   showChartValuesOutside: false,
+  //                   chartValueBackgroundColor: Colors.grey[200],
+  //                   colorList: colorList,
+  //                   showLegends: true,
+  //                   legendPosition: LegendPosition.right,
+  //                   initialAngle: 3,
+  //                   chartValueStyle: defaultChartValueStyle.copyWith(
+  //                     color: Colors.blueGrey[900].withOpacity(0.9),
+  //                   ),
+  //                   chartType: ChartType.disc,
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //         _buildTile(
+  //           Padding(
+  //             padding: const EdgeInsets.all(24.0),
+  //             child: Column(
+  //               mainAxisAlignment: MainAxisAlignment.start,
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: <Widget>[
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: <Widget>[
+  //                     Column(
+  //                       mainAxisAlignment: MainAxisAlignment.start,
+  //                       crossAxisAlignment: CrossAxisAlignment.start,
+  //                       children: <Widget>[
+  //                         Text('Vote', style: TextStyle(color: Colors.green)),
+  //                         Text('\16K',
+  //                             style: TextStyle(
+  //                                 color: Colors.black,
+  //                                 fontWeight: FontWeight.w700,
+  //                                 fontSize: 34.0)),
+  //                       ],
+  //                     ),
+  //                     DropdownButton(
+  //                       isDense: true,
+  //                       value: actualDropdown,
+  //                       onChanged: (String value) => setState(
+  //                         () {
+  //                           actualDropdown = value;
+  //                           actualChart = chartDropdownItems
+  //                               .indexOf(value); // Refresh the chart
+  //                         },
+  //                       ),
+  //                       items: chartDropdownItems.map(
+  //                         (String title) {
+  //                           return DropdownMenuItem(
+  //                             value: title,
+  //                             child: Text(title,
+  //                                 style: TextStyle(
+  //                                     color: Colors.blue,
+  //                                     fontWeight: FontWeight.w400,
+  //                                     fontSize: 14.0)),
+  //                           );
+  //                         },
+  //                       ).toList(),
+  //                     )
+  //                   ],
+  //                 ),
+  //                 Padding(padding: EdgeInsets.only(bottom: 4.0)),
+  //                 Sparkline(
+  //                     data: charts[actualChart],
+  //                     lineWidth: 4.0,
+  //                     lineColor: Colors.red)
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //         _buildTile(
+  //           Padding(
+  //             padding: const EdgeInsets.all(24.0),
+  //             child: Row(
+  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               children: <Widget>[
+  //                 Column(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: <Widget>[
+  //                     Text('Total Vote used',
+  //                         style: TextStyle(color: Colors.redAccent)),
+  //                     Text(
+  //                       asyncSnapshot
+  //                           .data.elections[index].score.scores[0].score
+  //                           .toString(),
+  //                       style: TextStyle(
+  //                           color: Colors.black,
+  //                           fontWeight: FontWeight.w700,
+  //                           fontSize: 34.0),
+  //                     )
+  //                   ],
+  //                 ),
+  //                 Material(
+  //                   color: Colors.red,
+  //                   borderRadius: BorderRadius.circular(24.0),
+  //                   child: Center(
+  //                     child: Padding(
+  //                       padding: EdgeInsets.all(16.0),
+  //                       child:
+  //                           Icon(Icons.person, color: Colors.white, size: 30.0),
+  //                     ),
+  //                   ),
+  //                 )
+  //               ],
+  //             ),
+  //           ),
+  //           onTap: () => null,
+  //         )
+  //       ],
+  //       staggeredTiles: [
+  //         StaggeredTile.extent(2, 140.0),
+  //         StaggeredTile.extent(2, 50.0),
+  //         StaggeredTile.extent(1, 180.0),
+  //         StaggeredTile.extent(1, 180.0),
+  //         StaggeredTile.extent(2, 220.0),
+  //         StaggeredTile.extent(2, 110.0),
+  //       ],
+  //     ),
 
   Widget _buildTile(Widget child, {Function() onTap}) {
     return Material(
@@ -285,7 +310,7 @@ class _WelcomePageState extends State<WelcomePage> {
             onTap: onTap != null
                 ? () => onTap()
                 : () {
-                    print('Not set yet');
+                    // print(data[0]['createdBy']);
                   },
             child: child));
   }
