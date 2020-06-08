@@ -17,8 +17,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   LoginBloc _loginBloc;
-  TextEditingController _emailController = new TextEditingController();
-  TextEditingController _passwordController = new TextEditingController();
+  TextEditingController _emailController =
+      new TextEditingController(text: 'dev@gmail.com');
+  TextEditingController _passwordController =
+      new TextEditingController(text: '123456');
 
   @override
   void initState() {
@@ -48,12 +50,16 @@ class _LoginPageState extends State<LoginPage> {
                       backgroundColor: Colors.green,
                     ),
                   );
-                  return TakePictureScreen(
-                    camera: widget.camera,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TakePictureScreen(
+                        camera: widget.camera,
+                      ),
+                    ),
                   );
                 },
               );
-              // return VerifyPage();
             }
             if (state is LoginFailure) {
               _onWidgetDidBuild(
@@ -83,7 +89,8 @@ class _LoginPageState extends State<LoginPage> {
   _onLoadingButtonPressed() {
     print(_emailController.text);
     _loginBloc.dispatch(
-        LoginButtonPressed(_emailController.text, _passwordController.text));
+      LoginButtonPressed(_emailController.text, _passwordController.text),
+    );
   }
 
   Widget _buildLogin(BuildContext context) {
@@ -98,8 +105,8 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.symmetric(vertical: 50),
               child: Center(
                 child: Text(
-                  'Login',
-                  style: h1,
+                  'sign in'.toUpperCase(),
+                  style: h1bold,
                 ),
               ),
             ),
@@ -144,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: h4,
                   ),
                   SizedBox(
-                    height: 5,
+                    height: 10,
                   ),
                   TextField(
                     controller: _passwordController,
@@ -160,40 +167,47 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               child: Container(
-                width: 999,
-                child: FloatingActionButton.extended(
-                    heroTag: 'login',
-                    onPressed: () {
-                      _onLoadingButtonPressed();
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) => VerifyPage()));
-                    },
-                    label: Text('Login')),
+                color: Colors.blue,
+                child: FlatButton(
+                  onPressed: () {
+                    _onLoadingButtonPressed();
+                  },
+                  child: Text(
+                    'Login'.toUpperCase(),
+                    style: h2,
+                  ),
+                ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               child: Container(
-                width: 999,
-                child: FloatingActionButton.extended(
-                    heroTag: 'info',
-                    onPressed: () {},
-                    label: Text('Request Information')),
+                color: Colors.blue,
+                child: FlatButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Request Information'.toUpperCase(),
+                    style: h2,
+                  ),
+                ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               child: Container(
-                width: 999,
-                child: FloatingActionButton.extended(
-                    heroTag: 'back',
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => WelcomePage()));
-                    },
-                    label: Text('Back')),
+                color: Colors.blue,
+                child: FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => WelcomePage()));
+                  },
+                  child: Text(
+                    'Back'.toUpperCase(),
+                    style: h2,
+                  ),
+                ),
               ),
             ),
           ],

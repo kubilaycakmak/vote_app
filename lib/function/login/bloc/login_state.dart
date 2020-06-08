@@ -11,7 +11,6 @@ class LoginInitial extends LoginState {
 
 class LoginLoading extends LoginState {
   @override
-  // TODO: implement props
   List<Object> get props => throw UnimplementedError();
 }
 
@@ -20,7 +19,6 @@ class LoginSuccess extends LoginState {
 
   LoginSuccess({@required this.token});
   @override
-  // TODO: implement props
   List<Object> get props => [token];
 }
 

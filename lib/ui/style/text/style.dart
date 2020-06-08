@@ -16,6 +16,8 @@ var h0black = TextStyle(
   fontSize: 40,
   fontWeight: FontWeight.w800,
 );
+var h1bold =
+    TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800);
 var h1 =
     TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w400);
 var h2 =

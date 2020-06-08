@@ -21,8 +21,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             await signin(email: event.email, password: event.password);
         print(token);
         if (token == 'unsuccessful' || token == '') {
+          print('failure');
           yield LoginFailure(error: token);
         } else {
+          print('success');
           yield LoginSuccess(token: token);
         }
       } catch (e) {
