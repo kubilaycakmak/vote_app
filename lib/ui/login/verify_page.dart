@@ -130,15 +130,20 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             );
             await _controller.takePicture(path);
             print(path);
-            onLoad(context, 'Verifying..');
+            onLoad(context: context, text: 'Verifying..');
             futureVerify = verify(filename: path);
-            t = new Timer(Duration(milliseconds: 250), () async {
-              t.cancel();
-              setState(() {
-                floatButtonTitle = "Back";
-              });
-              Navigator.pop(context);
-            });
+            t = new Timer(
+              Duration(milliseconds: 250),
+              () async {
+                t.cancel();
+                setState(
+                  () {
+                    floatButtonTitle = "Back";
+                  },
+                );
+                Navigator.pop(context);
+              },
+            );
           },
         ),
       ),

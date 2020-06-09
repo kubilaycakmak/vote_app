@@ -6,7 +6,6 @@ import 'package:vote_app/data/repository/election_repository.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
 import 'package:vote_app/ui/vote/vote.dart';
 import '../style/text/style.dart';
-import '../welcome/welcome_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<ElectionList> futureElection;
+  Future<ElectionList> futureElection1;
   Map<String, double> dataMap = Map();
 
   List<Color> colorList = [
@@ -26,8 +25,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    futureElection1 = getElectionInformation();
     super.initState();
-    futureElection = getElectionInformation();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -39,7 +43,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHomePage() {
     return FutureBuilder<ElectionList>(
-      future: futureElection,
+      future: futureElection1,
       builder: (context, snapshot) {
         dataMap.putIfAbsent(snapshot.data.elections[0].parties.parties[0].name,
             () => snapshot.data.elections[0].score.scores[0].score.toDouble());
@@ -83,18 +87,35 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: 50,
+                      height: 20,
                     ),
                     Container(
                       child: Center(
                         child: Text(
-                          'Home'.toUpperCase(),
+                          'Current'.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: h0,
                         ),
                       ),
                     ),
-                    buildpie(dataMap)
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      child: GFCarousel(
+                        viewportFraction: 0.95,
+                        enableInfiniteScroll: false,
+                        height: 310,
+                        items: [0, 1].map((e) {
+                          return buildpie(
+                              map: dataMap,
+                              dateEnd: snapshot.data.elections[0].dateEnd,
+                              electionTitle:
+                                  snapshot.data.elections[0].description,
+                              snapshot: snapshot);
+                        }).toList(),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -102,35 +123,34 @@ class _HomePageState extends State<HomePage> {
             SliverToBoxAdapter(
               child: Container(
                 child: GFCarousel(
+                  viewportFraction: 0.95,
+                  aspectRatio: 16 / 9,
+                  enableInfiniteScroll: false,
                   height: 150,
-                  items: [
-                    buildParties(),
-                    buildParties(),
-                    buildParties(),
-                    buildParties(),
-                  ],
+                  items: [0, 1].map((e) {
+                    return buildParties(
+                        partyName:
+                            snapshot.data.elections[e].parties.parties[e].name,
+                        ideology: snapshot
+                            .data.elections[e].parties.parties[e].ideology,
+                        color: Colors.red);
+                  }).toList(),
                 ),
               ),
             ),
             SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
-                    child: GFCarousel(
-                      viewportFraction: 0.65,
-                      aspectRatio: 16 / 9,
-                      enableInfiniteScroll: false,
-                      activeIndicator: Colors.blue,
-                      height: 253,
-                      items: [
-                        gfCard(),
-                        gfCard(),
-                        gfCard(),
-                      ],
-                    ),
-                  ),
-                ],
+              child: GFCarousel(
+                viewportFraction: 0.95,
+                aspectRatio: 16 / 9,
+                enableInfiniteScroll: false,
+                activeIndicator: Colors.blue,
+                height: 320,
+                items: [0, 1].map((e) {
+                  return gfCard(
+                    electionTitle: snapshot.data.elections[e].description,
+                    dataMap: dataMap,
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -139,25 +159,35 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  GestureDetector buildParties() {
+  Widget buildParties({String partyName, String ideology, Color color}) {
     return GestureDetector(
       onTap: () {},
       child: GFCard(
         title: GFListTile(
-          title: Text('Party name'),
-          subTitle: Text('ideology'),
-          avatar: GFAvatar(),
+          title: Text(
+            partyName.toUpperCase(),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          subTitle: Text(
+            ideology.toUpperCase(),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
+          avatar: GFAvatar(
+            backgroundColor: color,
+            child: Text(partyName[0].toUpperCase()),
+          ),
         ),
       ),
     );
   }
 
-  GFCard gfCard() {
+  Widget gfCard({String electionTitle, Map dataMap}) {
     return GFCard(
       content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Title',
+            electionTitle,
             style: TextStyle(fontSize: 20, color: Colors.black),
           ),
           PieChart(
@@ -166,9 +196,9 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       buttonBar: GFButtonBar(
+        padding: EdgeInsets.all(10),
         children: <Widget>[
-          Container(
-            height: 68,
+          Flexible(
             child: GFButton(
               color: Colors.deepOrangeAccent,
               fullWidthButton: true,
@@ -182,25 +212,33 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildpie(Map map) {
+  Widget buildpie(
+      {Map map, String electionTitle, String dateEnd, AsyncSnapshot snapshot}) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 10, left: 10),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VotePage(
-                  dataMap: dataMap,
-                ),
-              ));
+            context,
+            MaterialPageRoute(
+              builder: (context) => VotePage(
+                dataMap: dataMap,
+                electionTitle: electionTitle,
+                dateEnd: dateEnd,
+                asyncSnapshot: snapshot,
+              ),
+            ),
+          );
         },
         child: Container(
           padding: EdgeInsets.all(30),
           decoration: BoxDecoration(color: Colors.white),
           child: Column(
             children: [
-              Text('Title'),
+              Text(
+                electionTitle,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               PieChart(
                 dataMap: map,
               ),
@@ -209,8 +247,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Last Day'),
+                      Text(dateEnd.substring(0, 10)),
                     ],
                   ),
                   Container(
@@ -220,8 +258,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Vote'),
+                      Text((map['ldp'] + map['rdp']).toInt().toString()),
                     ],
                   ),
                   Container(
@@ -231,19 +269,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
-                    ],
-                  ),
-                  Container(
-                    width: 3,
-                    height: 50,
-                    color: Colors.black26,
-                  ),
-                  Column(
-                    children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Status'),
+                      Text('-'),
                     ],
                   ),
                 ],

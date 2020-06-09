@@ -3,11 +3,21 @@ import 'package:getflutter/getflutter.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
 import 'package:vote_app/ui/style/text/style.dart';
+import 'package:vote_app/ui/widget/load.dart';
 
 class VotePage extends StatefulWidget {
+  final String dateEnd;
+  final String electionTitle;
   final Map dataMap;
+  final AsyncSnapshot asyncSnapshot;
 
-  const VotePage({Key key, @required this.dataMap}) : super(key: key);
+  const VotePage(
+      {Key key,
+      @required this.dataMap,
+      this.dateEnd,
+      this.electionTitle,
+      this.asyncSnapshot})
+      : super(key: key);
   @override
   _VotePageState createState() => _VotePageState();
 }
@@ -30,24 +40,27 @@ class _VotePageState extends State<VotePage> {
         ),
       ),
       body: Align(
-        alignment: Alignment.center,
         child: Container(
           decoration: BoxDecoration(
             gradient: backgroundGradient,
           ),
-          child: Column(
+          child: ListView(
             children: [
               SizedBox(
-                height: 120,
+                height: 30,
               ),
               Text(
                 'VOTE',
                 style: h0,
+                textAlign: TextAlign.center,
               ),
               SizedBox(
                 height: 20,
               ),
-              buildpie(widget.dataMap),
+              buildpie(
+                  map: widget.dataMap,
+                  electionTitle: widget.electionTitle,
+                  dateEnd: widget.dateEnd),
               SizedBox(
                 height: 20,
               ),
@@ -58,10 +71,23 @@ class _VotePageState extends State<VotePage> {
               SizedBox(
                 height: 20,
               ),
-              GFCarousel(
-                height: 150,
-                viewportFraction: 0.50,
-                items: [gfCard(), gfCard(), gfCard(), gfCard()],
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.dataMap.length,
+                  itemBuilder: (context, index) {
+                    return GFCarousel(
+                      scrollDirection: Axis.horizontal,
+                      height: 150,
+                      viewportFraction: 0.50,
+                      items: [
+                        gfCard(widget.asyncSnapshot.data.elections[index]
+                            .parties.parties[index].name
+                            .toString())
+                      ],
+                    );
+                  },
+                ),
               )
             ],
           ),
@@ -70,11 +96,20 @@ class _VotePageState extends State<VotePage> {
     );
   }
 
-  GFCard gfCard() {
+  GFCard gfCard(String title) {
     return GFCard(
       content: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          onLoad(context: context, text: 'Warning', function: () {});
+        },
         child: Container(
+          child: Center(
+            child: Text(
+              title,
+              style: h0,
+            ),
+          ),
+          width: 300,
           height: 100,
           color: Colors.red,
         ),
@@ -82,7 +117,7 @@ class _VotePageState extends State<VotePage> {
     );
   }
 
-  Widget buildpie(Map map) {
+  Widget buildpie({Map map, String electionTitle, String dateEnd}) {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: GestureDetector(
@@ -92,7 +127,7 @@ class _VotePageState extends State<VotePage> {
           decoration: BoxDecoration(color: Colors.white),
           child: Column(
             children: [
-              Text('Title'),
+              Text(electionTitle),
               PieChart(
                 dataMap: map,
               ),
@@ -101,8 +136,8 @@ class _VotePageState extends State<VotePage> {
                 children: [
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Last Day'),
+                      Text(dateEnd.substring(0, 10)),
                     ],
                   ),
                   Container(
@@ -112,8 +147,8 @@ class _VotePageState extends State<VotePage> {
                   ),
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Vote'),
+                      Text((map['ldp'] + map['rdp']).toInt().toString()),
                     ],
                   ),
                   Container(
@@ -123,19 +158,8 @@ class _VotePageState extends State<VotePage> {
                   ),
                   Column(
                     children: [
-                      Text('Days'),
-                      Text('Days'),
-                    ],
-                  ),
-                  Container(
-                    width: 3,
-                    height: 50,
-                    color: Colors.black26,
-                  ),
-                  Column(
-                    children: [
-                      Text('Days'),
-                      Text('Days'),
+                      Text('Status'),
+                      Text('-'),
                     ],
                   ),
                 ],

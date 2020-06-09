@@ -5,9 +5,9 @@ import 'package:vote_app/ui/welcome/welcome_page.dart';
 
 List<CameraDescription> cameras = [];
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final cameras = await availableCameras();
-  final firstCamera = cameras.last;
+  // WidgetsFlutterBinding.ensureInitialized();
+  // final cameras = await availableCameras();
+  // final firstCamera = cameras.last;
   runApp(
     MaterialApp(home: HomePage()
         //  WelcomePage(
