@@ -23,4 +23,4 @@ def face_recognition():
             return json.dumps(resp_data)
 
 
-app.run(host='192.168.1.7', port='5002', debug=True)
+app.run(host='192.168.1.2', port='5002', debug=True)

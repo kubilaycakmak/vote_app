@@ -34,7 +34,7 @@ class Person {
   });
 
   Person.fromJson(Map<String, dynamic> parsedJson)
-      : id = parsedJson['id'] == null ? 1 : parsedJson['id'],
+      : id = parsedJson['id'],
         name = parsedJson['name'],
         surname = parsedJson['surname'],
         password = parsedJson['password'],

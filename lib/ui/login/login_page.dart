@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vote_app/data/repository/user_repository.dart';
 import 'package:vote_app/function/login/bloc/login_bloc.dart';
 import 'package:vote_app/ui/login/verify_page.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
@@ -42,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
               );
             }
             if (state is LoginSuccess) {
+              print(person.email);
               _onWidgetDidBuild(
                 () {
                   Scaffold.of(context).showSnackBar(

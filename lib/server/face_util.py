@@ -1,7 +1,7 @@
 import face_recognition as fr
 
-known_faces = [('Kubilay', 'C:/Users/x/Documents/kaan/kubilay.jpg'),
-               ('Kubilay', 'C:/Users/x/Documents/kaan/kubilay2.jpg'),
+known_faces = [('Kubilay', 'kubilay.jpg'),
+               ('Kubilay', 'kubilay2.jpg'),
                ]
 
 

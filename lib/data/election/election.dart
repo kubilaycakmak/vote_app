@@ -8,16 +8,15 @@ class Election {
   final String description;
   final PartyList parties;
   final ScoreList score;
-  final int electionId;
 
-  Election(
-      {this.dateStart,
-      this.dateEnd,
-      this.createdBy,
-      this.description,
-      this.parties,
-      this.score,
-      this.electionId});
+  Election({
+    this.dateStart,
+    this.dateEnd,
+    this.createdBy,
+    this.description,
+    this.parties,
+    this.score,
+  });
 
   Election.fromJson(Map<String, dynamic> parsedJson)
       : dateStart = parsedJson['dateStart'],
@@ -25,6 +24,5 @@ class Election {
         createdBy = parsedJson['createdBy'],
         description = parsedJson['description'],
         parties = PartyList.fromJson(parsedJson['parties']),
-        score = ScoreList.fromJson(parsedJson['score']),
-        electionId = parsedJson['election_id'];
+        score = ScoreList.fromJson(parsedJson['score']);
 }

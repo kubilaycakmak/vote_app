@@ -1,6 +1,8 @@
+import 'dart:async';
+import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:getflutter/getflutter.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:getflutter/getflutter.dart';
 import 'package:vote_app/data/election/election_list.dart';
 import 'package:vote_app/data/repository/election_repository.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
@@ -13,7 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<ElectionList> futureElection1;
+  Future<ElectionList> futureElection;
+  List<Map> dataList = List();
+  HashMap<String, double> hashMap = HashMap();
   Map<String, double> dataMap = Map();
 
   List<Color> colorList = [
@@ -25,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    futureElection1 = getElectionInformation();
+    futureElection = getElectionInformation();
     super.initState();
   }
 
@@ -43,13 +47,27 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHomePage() {
     return FutureBuilder<ElectionList>(
-      future: futureElection1,
+      future: futureElection,
       builder: (context, snapshot) {
-        dataMap.putIfAbsent(snapshot.data.elections[0].parties.parties[0].name,
-            () => snapshot.data.elections[0].score.scores[0].score.toDouble());
-        dataMap.putIfAbsent(snapshot.data.elections[1].parties.parties[1].name,
-            () => snapshot.data.elections[0].score.scores[1].score.toDouble());
         if (snapshot.hasData) {
+          for (int i = 0; i < snapshot.data.elections.length; i++) {
+            for (int j = 0;
+                j < snapshot.data.elections[i].parties.parties.length;
+                j++) {
+              Map<String, double> data$i = {
+                snapshot.data.elections[i].parties.parties[j].name:
+                    snapshot.data.elections[i].score.scores[j].score.toDouble()
+              };
+
+              // hashMap.putIfAbsent(
+              //   snapshot.data.elections[i].parties.parties[j].name,
+              //   () =>
+              //       snapshot.data.elections[i].score.scores[j].score.toDouble(),
+              // );
+            }
+            dataList.add(data1);
+          }
+          print(dataList);
           return _buildBody(context, snapshot);
         }
         if (!snapshot.hasData) {
@@ -65,8 +83,11 @@ class _HomePageState extends State<HomePage> {
   Widget _buildBody(BuildContext context, AsyncSnapshot snapshot) {
     return Scaffold(
       bottomNavigationBar: Container(
-        height: 80,
-        color: Colors.blue,
+        height: 60,
+        decoration: BoxDecoration(
+          boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 2)],
+          color: Colors.blue,
+        ),
         child: FlatButton(
           onPressed: () {},
           child: Text(
@@ -81,8 +102,7 @@ class _HomePageState extends State<HomePage> {
           slivers: [
             SliverToBoxAdapter(
               child: Container(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -92,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       child: Center(
                         child: Text(
-                          'Current'.toUpperCase(),
+                          'today'.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: h0,
                         ),
@@ -103,17 +123,18 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       child: GFCarousel(
-                        viewportFraction: 0.95,
+                        viewportFraction: 0.85,
                         enableInfiniteScroll: false,
-                        height: 310,
-                        items: [0, 1].map((e) {
-                          return buildpie(
-                              map: dataMap,
+                        height: 270,
+                        items: [
+                          buildpie(
+                              map: dataList[0],
                               dateEnd: snapshot.data.elections[0].dateEnd,
                               electionTitle:
                                   snapshot.data.elections[0].description,
-                              snapshot: snapshot);
-                        }).toList(),
+                              snapshot: snapshot,
+                              index: 0)
+                        ],
                       ),
                     ),
                   ],
@@ -122,35 +143,51 @@ class _HomePageState extends State<HomePage> {
             ),
             SliverToBoxAdapter(
               child: Container(
-                child: GFCarousel(
-                  viewportFraction: 0.95,
-                  aspectRatio: 16 / 9,
-                  enableInfiniteScroll: false,
-                  height: 150,
-                  items: [0, 1].map((e) {
+                height: 200,
+                child: ListView.builder(
+                  itemCount: 4,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, e) {
                     return buildParties(
                         partyName:
                             snapshot.data.elections[e].parties.parties[e].name,
                         ideology: snapshot
                             .data.elections[e].parties.parties[e].ideology,
-                        color: Colors.red);
-                  }).toList(),
+                        color: colorList[e]);
+                  },
                 ),
               ),
             ),
             SliverToBoxAdapter(
-              child: GFCarousel(
-                viewportFraction: 0.95,
-                aspectRatio: 16 / 9,
-                enableInfiniteScroll: false,
-                activeIndicator: Colors.blue,
-                height: 320,
-                items: [0, 1].map((e) {
-                  return gfCard(
-                    electionTitle: snapshot.data.elections[e].description,
-                    dataMap: dataMap,
-                  );
-                }).toList(),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 20),
+                height: 300,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemCount: snapshot.data.elections.length,
+                  itemBuilder: (context, index) {
+                    var dateEnd =
+                        snapshot.data.elections[index].dateEnd.toString();
+                    DateTime dateTime = DateTime.parse(dateEnd);
+                    if (dateTime.isAfter(DateTime.now())) {
+                      return gfCard(
+                          electionTitle:
+                              snapshot.data.elections[index].description,
+                          dataMap: dataList[index],
+                          dateEnd: snapshot.data.elections[index].dateEnd,
+                          dateStart: snapshot.data.elections[index].dateStart,
+                          index: index);
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 30,
               ),
             ),
           ],
@@ -162,77 +199,110 @@ class _HomePageState extends State<HomePage> {
   Widget buildParties({String partyName, String ideology, Color color}) {
     return GestureDetector(
       onTap: () {},
-      child: GFCard(
-        title: GFListTile(
-          title: Text(
-            partyName.toUpperCase(),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          subTitle: Text(
-            ideology.toUpperCase(),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
-          avatar: GFAvatar(
-            backgroundColor: color,
-            child: Text(partyName[0].toUpperCase()),
-          ),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5),
+        width: 360,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GFAvatar(
+              backgroundColor: color,
+              child: Text(partyName[0].toUpperCase()),
+            ),
+            Text(
+              partyName.toUpperCase(),
+              style: h1bold,
+            ),
+            Text(
+              ideology.toUpperCase(),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget gfCard({String electionTitle, Map dataMap}) {
-    return GFCard(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            electionTitle,
-            style: TextStyle(fontSize: 20, color: Colors.black),
-          ),
-          PieChart(
-            dataMap: dataMap,
-          ),
-        ],
-      ),
-      buttonBar: GFButtonBar(
-        padding: EdgeInsets.all(10),
-        children: <Widget>[
-          Flexible(
-            child: GFButton(
-              color: Colors.deepOrangeAccent,
-              fullWidthButton: true,
-              onPressed: () {},
-              text: 'Join'.toUpperCase(),
-              textStyle: h2,
+  Widget gfCard(
+      {String electionTitle,
+      Map dataMap,
+      String dateEnd,
+      String dateStart,
+      int index}) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 15, left: 0),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5),
+        width: 360,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              electionTitle,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
+            PieChart(
+              dataMap: dataMap,
+              colorList: colorList,
+            ),
+            ButtonTheme(
+              minWidth: double.infinity,
+              child: FlatButton(
+                color: Colors.blue,
+                child: Text('JOIN', style: h2),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VotePage(
+                        index: index,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget buildpie(
-      {Map map, String electionTitle, String dateEnd, AsyncSnapshot snapshot}) {
+      {Map map,
+      String electionTitle,
+      String dateEnd,
+      AsyncSnapshot snapshot,
+      int index}) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10, left: 10),
+      padding: const EdgeInsets.only(top: 15, left: 0),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => VotePage(
-                dataMap: dataMap,
-                electionTitle: electionTitle,
-                dateEnd: dateEnd,
-                asyncSnapshot: snapshot,
+                index: index,
               ),
             ),
           );
         },
         child: Container(
-          padding: EdgeInsets.all(30),
-          decoration: BoxDecoration(color: Colors.white),
+          margin: EdgeInsets.symmetric(horizontal: 5),
+          width: 360,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Column(
             children: [
               Text(
@@ -240,7 +310,8 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               PieChart(
-                dataMap: map,
+                dataMap: dataList[index],
+                colorList: colorList,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -259,7 +330,7 @@ class _HomePageState extends State<HomePage> {
                   Column(
                     children: [
                       Text('Vote'),
-                      Text((map['ldp'] + map['rdp']).toInt().toString()),
+                      // Text((map['ldp'] + map['rdp']).toInt().toString()),
                     ],
                   ),
                   Container(

@@ -1,11 +1,11 @@
-import 'candidate.dart';
+import 'package:vote_app/data/election/person.dart';
 
 class Party {
   final int id;
   final String name;
   final String dateOfFoundation;
   final String ideology;
-  final Candidate candidate;
+  final Person candidate;
 
   Party(
       {this.id,
@@ -19,5 +19,5 @@ class Party {
         name = parsedJson['name'],
         dateOfFoundation = parsedJson['dateOfFoundation'],
         ideology = parsedJson['ideology'],
-        candidate = Candidate.fromJson(parsedJson['candidate']);
+        candidate = Person.fromJson(parsedJson['candidate']);
 }
