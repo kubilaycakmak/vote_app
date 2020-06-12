@@ -21,6 +21,7 @@ Future<String> signin(
   if (response.statusCode == 200) {
     token = json.decode(response.body);
     person = new AuthPerson.fromJson(token);
+    print(person.id);
     return token['accessToken'];
   } else {
     return 'unsuccessful';

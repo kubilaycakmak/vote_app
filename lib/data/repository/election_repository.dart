@@ -15,7 +15,7 @@ Future<ElectionList> getElectionInformation() async {
   }
 }
 
-Future<Null> useVote({int electionId, int partyId, int personId}) async {
+Future<String> useVote({int electionId, int partyId, int personId}) async {
   var url = 'http://192.168.1.2:8080/api/test/use/vote';
   Map body = {
     'election_id': electionId,
@@ -31,8 +31,8 @@ Future<Null> useVote({int electionId, int partyId, int personId}) async {
   );
 
   if (response.statusCode == 200) {
-    print("vote used successfully!");
+    return response.body;
   } else {
-    print("Error");
+    return response.body;
   }
 }

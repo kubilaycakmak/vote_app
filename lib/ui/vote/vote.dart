@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:getflutter/getflutter.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vote_app/data/auth/auth_person.dart';
 import 'package:vote_app/data/election/election_list.dart';
 import 'package:vote_app/data/repository/election_repository.dart';
+import 'package:vote_app/data/repository/user_repository.dart';
 import 'package:vote_app/ui/home/home_page.dart';
 import 'package:vote_app/ui/style/color/colors.dart';
 import 'package:vote_app/ui/style/text/style.dart';
-import 'package:vote_app/ui/widget/load.dart';
 
 class VotePage extends StatefulWidget {
   final int index;
@@ -17,6 +18,7 @@ class VotePage extends StatefulWidget {
 }
 
 class _VotePageState extends State<VotePage> {
+  AuthPerson authPerson;
   Future<ElectionList> futureElection;
   Map<String, double> dataMap = Map();
 
@@ -131,9 +133,23 @@ class _VotePageState extends State<VotePage> {
                     .data.elections[widget.index].parties.parties.length,
                 itemBuilder: (context, e) {
                   return gfCard(
-                      asyncSnapshot.data.elections[e].parties.parties[e].name
-                          .toString(),
-                      e);
+                    asyncSnapshot.data.elections[e].parties.parties[e].name
+                        .toString(),
+                    e,
+                    function: () async {
+                      print(widget.index + 1);
+                      int i = widget.index + 1;
+                      print(i);
+                      print("person id: " + person.id.toString());
+                      String response = await useVote(
+                        electionId: i,
+                        partyId: asyncSnapshot
+                            .data.elections[e].parties.parties[e].id,
+                        personId: person.id,
+                      );
+                      print(response);
+                    },
+                  );
                 },
               ),
             )
@@ -143,12 +159,11 @@ class _VotePageState extends State<VotePage> {
     );
   }
 
-  GFCard gfCard(String title, int index) {
+  GFCard gfCard(String title, int index, {Function function}) {
     return GFCard(
       content: GestureDetector(
-        onTap: () {
-          onLoad(context: context, text: 'Warning', function: () {});
-        },
+        onTap: function,
+        // onLoad(context: context, text: 'Warning', function: () => function);
         child: Container(
           child: Center(
             child: Text(

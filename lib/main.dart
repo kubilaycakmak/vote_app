@@ -15,16 +15,16 @@ Future<void> main() async {
   final firstCamera = cameras.last;
   runApp(
     MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home:
-            // LoginPage()
-            HomePage()
-        //     WelcomePage(
-        //   camera: firstCamera,
-        // ),
-        // TakePictureScreen(
-        //   camera: firstCamera,
-        // ),
-        ),
+      debugShowCheckedModeBanner: false,
+      home:
+          // LoginPage()
+          // HomePage()
+          WelcomePage(
+        camera: firstCamera,
+      ),
+      // TakePictureScreen(
+      //   camera: firstCamera,
+      // ),
+    ),
   );
 }

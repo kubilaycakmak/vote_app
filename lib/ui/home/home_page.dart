@@ -54,20 +54,15 @@ class _HomePageState extends State<HomePage> {
             for (int j = 0;
                 j < snapshot.data.elections[i].parties.parties.length;
                 j++) {
-              Map<String, double> data$i = {
-                snapshot.data.elections[i].parties.parties[j].name:
-                    snapshot.data.elections[i].score.scores[j].score.toDouble()
-              };
-
-              // hashMap.putIfAbsent(
-              //   snapshot.data.elections[i].parties.parties[j].name,
-              //   () =>
-              //       snapshot.data.elections[i].score.scores[j].score.toDouble(),
-              // );
+              dataMap.putIfAbsent(
+                snapshot.data.elections[i].parties.parties[j].name,
+                () =>
+                    snapshot.data.elections[i].score.scores[j].score.toDouble(),
+              );
             }
-            dataList.add(data1);
+            dataList.add(dataMap);
           }
-          print(dataList);
+          // print(dataList);
           return _buildBody(context, snapshot);
         }
         if (!snapshot.hasData) {
@@ -143,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             ),
             SliverToBoxAdapter(
               child: Container(
-                height: 200,
+                height: 150,
                 child: ListView.builder(
                   itemCount: 4,
                   scrollDirection: Axis.horizontal,
